@@ -1083,3 +1083,17 @@ window.addEventListener('DOMContentLoaded', async function init() {
     try { await openDoc(decodeURIComponent(m[1])); } catch { /* 文档可能已删除 */ }
   }
 });
+
+// 移动端侧边栏抽屉
+(function() {
+  const btn = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!btn || !sidebar) return;
+  function toggle() { sidebar.classList.toggle('open'); }
+  function close() { sidebar.classList.remove('open'); }
+  btn.addEventListener('click', toggle);
+  backdrop.addEventListener('click', close);
+  // 选中文档后自动关闭抽屉
+  window.addEventListener('hashchange', close);
+})();

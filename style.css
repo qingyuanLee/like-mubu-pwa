@@ -217,3 +217,61 @@ body.dark .node-row.flash { background: #4a3f16; }
 
 .tree-toolbar { display: flex; gap: 8px; padding: 4px 12px; border-bottom: 1px solid var(--border); }
 .tree-toolbar .linklike { font-size: 12px; padding: 2px 6px; }
+
+/* ---------- 移动端适配 ---------- */
+#menu-toggle {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 20px; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 40;
+}
+
+@media (max-width: 768px) {
+  body { font-size: 16px; }
+  #menu-toggle { display: block; }
+
+  /* 侧边栏变成抽屉 */
+  #sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 45;
+    width: 280px !important; min-width: 280px !important;
+    transform: translateX(-100%); transition: transform .25s ease;
+    box-shadow: 2px 0 12px rgba(0,0,0,.15);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #sidebar.open ~ .sidebar-backdrop { display: block; }
+
+  /* 主区占满全宽 */
+  #main { width: 100%; }
+
+  /* 文档头部紧凑 */
+  .doc-header { padding: 8px 10px; gap: 6px; flex-wrap: wrap; }
+  .doc-title { font-size: 17px; min-width: 0; flex: 1; }
+  .doc-actions { gap: 3px; flex-wrap: wrap; }
+  .doc-actions .btn { padding: 3px 6px; font-size: 11px; }
+  .save-status { display: none; }
+
+  /* 大纲内容适配 */
+  .outline { padding: 10px 10px 100px; }
+  .node-list .node-list { padding-left: 14px; }
+  .node-row { min-height: 36px; }
+  .node-text { font-size: 16px; padding: 4px 2px; }
+
+  /* 图片适配屏幕 */
+  .node-text img { max-width: 100% !important; max-height: 220px; }
+
+  /* 欢迎页 */
+  .welcome { padding: 24px 16px; }
+  .welcome h1 { font-size: 18px; }
+
+  /* 弹窗 */
+  .modal { width: 94vw; padding: 14px; }
+
+  /* 搜索结果 */
+  .search-results { max-height: 40vh; }
+
+  /* 品牌栏 */
+  .brand { padding: 10px 12px 6px; }
+  .side-actions { padding: 4px 10px 8px; }
+  .search-wrap { padding: 0 10px 6px; }
+}
