@@ -699,6 +699,30 @@ async function runSearch(q) {
   const results = await api('GET', `/api/search?q=${encodeURIComponent(q)}`).catch(() => []);
   state.searchResults = results;
   const box = $('#search-results');
+
+  // 同时过滤左侧目录树：只显示匹配的文档
+  if (!q) {
+    renderTree(state.tree);  // 恢复完整目录
+    box.classList.add('hidden');
+    return;
+  }
+
+  // 构建过滤后的树（只保留路径/标题匹配的节点及其祖先）
+  const matchedPaths = new Set(results.map(r => r.path));
+  function filterTree(nodes) {
+    const out = [];
+    for (const n of nodes) {
+      if (n.type === 'folder') {
+        const filtered = filterTree(n.children || []);
+        if (filtered.length) out.push({ ...n, children: filtered });
+      } else {
+        if (matchedPaths.has(n.path)) out.push(n);
+      }
+    }
+    return out;
+  }
+  renderTree(filterTree(state.tree));
+
   box.classList.remove('hidden');
   box.innerHTML = '';
   if (!results.length) {
