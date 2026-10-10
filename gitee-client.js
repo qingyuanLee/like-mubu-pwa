@@ -104,12 +104,15 @@ function buildTree(paths) {
 function parseMd(content) {
   const lines = content.split('\n');
   let title = '';
+  let titleSkipped = false;  // 第一个 # 只作为文档标题，不入大纲树
   const nodes = [];
   const stack = [{ level: 0, children: nodes }];
   for (const line of lines) {
     const m = line.match(/^(#{1,6})\s+(.*)/);
     if (m) {
       if (!title) title = m[2];
+      // 第一个标题只作为文档名，不作为大纲节点
+      if (!titleSkipped) { titleSkipped = true; continue; }
       const level = m[1].length;
       while (stack.length > 1 && stack[stack.length - 1].level >= level) stack.pop();
       const node = { text: m[2], children: [] };
