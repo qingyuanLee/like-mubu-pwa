@@ -214,7 +214,7 @@ function renderInline(raw) {
   let t = esc(raw);
   const codes = [];
   t = t.replace(/`([^`]+)`/g, (m, p) => { codes.push(p); return `\u0000${codes.length - 1}\u0000`; });
-  t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (m, alt, url) => `<img src="${esc(url)}" alt="${esc(alt)}" loading="lazy" data-orig="${esc(m)}">`);
+  t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (m, alt, url) => { const fixed = window.fixGiteeImg ? window.fixGiteeImg(url) : url; return `<img src="${esc(fixed)}" alt="${esc(alt)}" loading="lazy" data-orig="${esc(m)}">`; });
   t = t.replace(/^\[([ xX])\]\s+/, (m, c) => `<span class="cb-mark">[${c.toLowerCase()}]</span> `);
   t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
   t = t.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')

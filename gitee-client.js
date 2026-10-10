@@ -122,6 +122,19 @@ function parseMd(content) {
   return { title: title || '未命名', nodes };
 }
 
+// 给 Gitee raw URL 自动加 token（让 <img> 能加载私有仓库图片）
+window.fixGiteeImg = function(url) {
+  if (!url) return url;
+  if (url.includes('gitee.com') && !url.includes('access_token=')) {
+    const token = localStorage.getItem('gitee_token');
+    if (token) {
+      const sep = url.includes('?') ? '&' : '?';
+      return url + sep + 'access_token=' + token;
+    }
+  }
+  return url;
+};
+
 // ---- 覆盖 window.api ----
 window.api = async function(method, url, body) {
   // 健康检查
@@ -238,7 +251,8 @@ window.api = async function(method, url, body) {
     const ts = Date.now();
     const relPath = `images/${ts}_${name}`;
     await gitee(`${GITEE_CFG.root}/${enc(relPath)}`, { method: 'POST', body: { content: body.dataBase64, message: `upload ${name}` } });
-    return { url: `https://gitee.com/${GITEE_CFG.owner}/${GITEE_CFG.repo}/raw/${GITEE_CFG.branch}/${GITEE_CFG.root}/${relPath}` };
+    const token = getToken();
+    return { url: `https://gitee.com/${GITEE_CFG.owner}/${GITEE_CFG.repo}/raw/${GITEE_CFG.branch}/${GITEE_CFG.root}/${relPath}?access_token=${token}` };
   }
 
   // 文档 CRUD: /api/docs/xxx
