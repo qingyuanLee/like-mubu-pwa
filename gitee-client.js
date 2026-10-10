@@ -263,8 +263,10 @@ window.api = async function(method, url, body) {
     if (method === 'GET') {
       const file = await gitee(`${GITEE_CFG.root}/${enc(docPath)}`);
       const content = b64decode(file.content);
-      const { title, nodes } = parseMd(content);
-      return { path: docPath, title, nodes, raw: content };
+      const { nodes } = parseMd(content);
+      // 文档名用文件名（去掉路径和 .md），不用 markdown 里的 # 标题
+      const fileName = docPath.replace(/\.md$/, '').split('/').pop();
+      return { path: docPath, title: fileName, nodes, raw: content };
     }
     if (method === 'PUT') {
       const { title, nodes } = body;
