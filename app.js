@@ -732,6 +732,9 @@ async function openDoc(path) {
   state.view = 'outline';
   setStatus('已加载');
   location.hash = 'doc=' + encodeURIComponent(doc.path);
+  // 默认折叠到一级（只显示顶层节点）
+  state.collapsed = new Set();
+  collectNodeIds(state.current.nodes || [], 1).forEach(x => { if (x.depth >= 1) state.collapsed.add(x.id); });
   renderDoc();
   $('#search-results').classList.add('hidden');
   $('#search').blur();
