@@ -415,6 +415,8 @@ function renderDoc() {
     renderMindMap();
   }
   refreshSidebar();
+  // 重建 DOM 后主动加载 Gitee 图片（折叠再展开时新 img 需要重新加载）
+  if (window.loadGiteeImages) window.loadGiteeImages();
 }
 
 /** 空文档占位节点：点击即可输入，输入后自动转为真实首节点 */
