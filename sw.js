@@ -1,5 +1,5 @@
 // Service Worker：缓存静态资源，API 请求不缓存
-const CACHE_NAME = 'like-mubu-v2';
+const CACHE_NAME = 'like-mubu-v3';
 const ASSETS = ['/', '/index.html', '/app.js', '/gitee-client.js', '/style.css', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
