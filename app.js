@@ -55,6 +55,61 @@ const state = {
 };
 
 function persistCollapsed() { localStorage.setItem('lm.collapsed', JSON.stringify([...state.collapsed])); }
+
+// 收集所有节点 id
+function collectNodeIds(nodes, depth) {
+  let ids = [];
+  for (const n of (nodes || [])) {
+    if (n.children && n.children.length) {
+      ids.push({ id: n.id, depth: depth || 1 });
+      ids = ids.concat(collectNodeIds(n.children, (depth || 1) + 1));
+    }
+  }
+  return ids;
+}
+
+// 全部展开 / 全部折叠
+function setAllCollapsed(collapse) {
+  if (!state.current || !state.current.nodes) return;
+  const all = collectNodeIds(state.current.nodes, 1);
+  state.collapsed = new Set();
+  if (collapse) all.forEach(x => state.collapsed.add(x.id));
+  persistCollapsed();
+  renderDoc();
+}
+
+// 折叠到指定层级（1=只显示一级）
+function collapseToLevel(level) {
+  if (!state.current || !state.current.nodes) return;
+  const all = collectNodeIds(state.current.nodes, 1);
+  state.collapsed = new Set();
+  all.forEach(x => { if (x.depth >= level) state.collapsed.add(x.id); });
+  persistCollapsed();
+  renderDoc();
+}
+
+// 展开/折叠某节点的所有子孙
+function toggleSubtree(nodeId, collapse) {
+  function find(nodes) {
+    for (const n of (nodes || [])) {
+      if (n.id === nodeId) return n;
+      if (n.children) {
+        const r = find(n.children);
+        if (r) return r;
+      }
+    }
+    return null;
+  }
+  const node = find(state.current.nodes || []);
+  if (!node) return;
+  const sub = collectNodeIds([node], 1);
+  sub.forEach(x => {
+    if (collapse) state.collapsed.add(x.id);
+    else state.collapsed.delete(x.id);
+  });
+  persistCollapsed();
+  renderDoc();
+}
 function persistExpand() { localStorage.setItem('lm.expand', JSON.stringify([...state.expand])); }
 
 // ============ 状态栏 / Toast ============
@@ -313,6 +368,20 @@ function buildList(nodes) {
       });
       return b;
     };
+    // 折叠/展开该节点的所有子孙（仅对有子节点的行显示）
+    if (n.children && n.children.length) {
+      const subBtn = document.createElement('button');
+      subBtn.textContent = '⤓';
+      subBtn.title = '折叠/展开所有子孙';
+      subBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // 判断当前是否有子孙被折叠
+        const sub = collectNodeIds([n], 1);
+        const hasCollapsed = sub.some(x => state.collapsed.has(x.id));
+        toggleSubtree(n.id, !hasCollapsed);
+      });
+      actions.append(subBtn);
+    }
     actions.append(mk('child', '+', '新增子节点 (Ctrl+Enter)'), mk('up', '↑', '上移 (Alt+↑)'), mk('down', '↓', '下移 (Alt+↓)'), mk('del', '×', '删除节点'));
 
     row.append(caret, bullet, text, actions);
@@ -966,6 +1035,8 @@ $('#btn-props').addEventListener('click', showProps);
 $('#btn-del').addEventListener('click', delDoc);
 $('#btn-map').addEventListener('click', () => { state.view = 'mindmap'; renderDoc(); });
 $('#btn-outline').addEventListener('click', () => { state.view = 'outline'; renderDoc(); });
+$('#btn-doc-expand').addEventListener('click', () => setAllCollapsed(false));
+$('#btn-doc-collapse').addEventListener('click', () => collapseToLevel(1));
 $('#doc-title').addEventListener('input', (e) => {
   if (!state.current) return;
   state.current.title = e.target.value;
