@@ -47,18 +47,22 @@ function b64decode(b64) {
 }
 
 // 递归列目录
+// 缓存全量文件列表，避免每次搜索都递归请求
+let _treeCache = null;
 async function listDir(relPath) {
-  const items = await gitee(relPath);
-  const result = [];
-  for (const it of items) {
-    if (it.type === 'file' && it.name.endsWith('.md')) {
-      result.push(it.path.replace(GITEE_CFG.root + '/', ''));
-    } else if (it.type === 'dir') {
-      result.push(...await listDir(it.path));
-    }
+  // 用 Git Trees API 一次性拿全量文件列表（recursive=1）
+  if (!_treeCache) {
+    const token = localStorage.getItem('gitee_token');
+    const url = `https://gitee.com/api/v5/repos/${GITEE_CFG.owner}/${GITEE_CFG.repo}/git/trees/${GITEE_CFG.branch}?recursive=1&access_token=${token}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    _treeCache = (data.tree || []).filter(t => t.type === 'blob' && t.path.endsWith('.md') && t.path.startsWith(GITEE_CFG.root + '/'))
+      .map(t => t.path.replace(GITEE_CFG.root + '/', ''));
   }
-  return result;
+  return _treeCache;
 }
+// 刷新缓存（保存/新建/删除文档后调用）
+function invalidateTreeCache() { _treeCache = null; }
 
 // 构建目录树
 function buildTree(paths) {
