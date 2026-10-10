@@ -41,6 +41,7 @@ const state = {
   health: null,
   current: null,          // { path, title, nodes }
   tree: [],
+  filteredTree: null,
   collapsed: new Set(JSON.parse(localStorage.getItem('lm.collapsed') || '[]')),
   expand: new Set(JSON.parse(localStorage.getItem('lm.expand') || '[]')),
   dirty: false,
@@ -619,7 +620,7 @@ function renderTree(tree) {
           const key = it.path || it.name;
           if (state.expand.has(key)) state.expand.delete(key); else state.expand.add(key);
           persistExpand();
-          renderTree(state.tree);
+          renderTree(state.filteredTree || state.tree);
         });
         li.appendChild(row);
         if (open) {
@@ -702,6 +703,7 @@ async function runSearch(q) {
 
   // 同时过滤左侧目录树：只显示匹配的文档
   if (!q) {
+    state.filteredTree = null;
     renderTree(state.tree);  // 恢复完整目录
     box.classList.add('hidden');
     return;
@@ -721,7 +723,8 @@ async function runSearch(q) {
     }
     return out;
   }
-  renderTree(filterTree(state.tree));
+  state.filteredTree = filterTree(state.tree);
+  renderTree(state.filteredTree);
 
   box.classList.remove('hidden');
   box.innerHTML = '';
