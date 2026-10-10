@@ -1,0 +1,15 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# API 请求转发到 Netlify Function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# SPA fallback：非静态文件请求都回 index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
