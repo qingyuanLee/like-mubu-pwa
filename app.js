@@ -1104,6 +1104,8 @@ window.addEventListener('DOMContentLoaded', async function init() {
   } catch (e) {
     toast('无法连接后端服务，请确认已运行 npm start');
   }
+  // token 就绪后（PWA 首次打开输入 PAT 后）自动刷新目录
+  if (typeof onTokenReady === 'function') onTokenReady(() => refreshSidebar().catch(() => {}));
   await refreshSidebar().catch(() => {});
   const m = location.hash.match(/^#doc=(.+)$/);
   if (m) {

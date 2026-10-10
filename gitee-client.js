@@ -9,11 +9,17 @@ const GITEE_CFG = {
 };
 
 // ---- token 管理 ----
+let _tokenCallbacks = [];
+function onTokenReady(fn) { _tokenCallbacks.push(fn); }
 function getToken() {
   let t = localStorage.getItem('gitee_token');
   if (!t) {
     t = prompt('请输入 Gitee 私人令牌（PAT）：\n（Gitee → 设置 → 私人令牌 → 生成新令牌）');
-    if (t) localStorage.setItem('gitee_token', t.trim());
+    if (t) {
+      localStorage.setItem('gitee_token', t.trim());
+      // token 就绪后，刷新侧边栏目录
+      _tokenCallbacks.forEach(fn => { try { fn(); } catch {} });
+    }
   }
   return t;
 }
