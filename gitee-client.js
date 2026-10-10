@@ -122,18 +122,56 @@ function parseMd(content) {
   return { title: title || '未命名', nodes };
 }
 
-// 给 Gitee raw URL 自动加 token（让 <img> 能加载私有仓库图片）
+// 图片加载：Gitee raw URL 403，改用 API 获取 base64
+// fixGiteeImg 不再修改 URL，只标记需要异步加载的图片
 window.fixGiteeImg = function(url) {
   if (!url) return url;
-  if (url.includes('gitee.com') && !url.includes('access_token=')) {
-    const token = localStorage.getItem('gitee_token');
-    if (token) {
-      const sep = url.includes('?') ? '&' : '?';
-      return url + sep + 'access_token=' + token;
-    }
+  // 返回占位 URL，实际加载由 loadGiteeImages 处理
+  if (url.includes('gitee.com/') && url.includes('/raw/')) {
+    return url; // 保持原 URL，后面异步拦截加载
   }
   return url;
 };
+
+// 异步加载 Gitee 图片：把 <img src="gitee raw url"> 转成 data URL
+async function loadGiteeImg(img) {
+  const src = img.src;
+  if (!src || !src.includes('gitee.com/') || !src.includes('/raw/')) return;
+  // 解析 URL: https://gitee.com/{owner}/{repo}/raw/{branch}/{path}
+  const m = src.match(/gitee\.com\/([^/]+)\/([^/]+)\/raw\/([^/]+)\/(.+)/);
+  if (!m) return;
+  const [, owner, repo, branch, path] = m;
+  const token = localStorage.getItem('gitee_token');
+  if (!token) return;
+  try {
+    const apiUrl = `https://gitee.com/api/v5/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?access_token=${token}&ref=${branch}`;
+    const resp = await fetch(apiUrl);
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!data.content) return;
+    const ext = path.split('.').pop().toLowerCase();
+    const mime = ext === 'png' ? 'image/png' : ext === 'gif' ? 'image/gif' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+    img.src = `data:${mime};base64,${data.content}`;
+  } catch {}
+}
+
+// 遍历所有 Gitee 图片并异步加载
+window.loadGiteeImages = function(root) {
+  (root || document).querySelectorAll('img[src*="gitee.com"][src*="/raw/"]').forEach((img) => {
+    if (img.dataset.loaded) return;
+    img.dataset.loaded = '1';
+    loadGiteeImg(img);
+  });
+};
+
+// 监听 DOM 变化，自动加载新出现的 Gitee 图片
+if (typeof MutationObserver !== 'undefined') {
+  const obs = new MutationObserver(() => window.loadGiteeImages());
+  document.addEventListener('DOMContentLoaded', () => {
+    obs.observe(document.body, { childList: true, subtree: true });
+    window.loadGiteeImages();
+  });
+}
 
 // ---- 覆盖 window.api ----
 window.api = async function(method, url, body) {
