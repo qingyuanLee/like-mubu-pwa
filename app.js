@@ -571,6 +571,33 @@ function renderTree(tree) {
   };
   nav.appendChild(build(tree));
 }
+
+// 展开全部 / 折叠全部
+function collectFolders(items, out) {
+  out = out || [];
+  for (const it of items || []) {
+    if (it.type === 'folder') {
+      out.push(it.path || it.name);
+      collectFolders(it.children, out);
+    }
+  }
+  return out;
+}
+function expandAll() {
+  const folders = collectFolders(state.tree);
+  folders.forEach((f) => state.expand.add(f));
+  persistExpand();
+  renderTree(state.tree);
+}
+function collapseAll() {
+  state.expand.clear();
+  persistExpand();
+  renderTree(state.tree);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  $('#btn-expand-all')?.addEventListener('click', expandAll);
+  $('#btn-collapse-all')?.addEventListener('click', collapseAll);
+});
 function renderTags(tags) {
   const box = $('#tag-list');
   box.innerHTML = '';

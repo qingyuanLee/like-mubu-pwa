@@ -214,3 +214,6 @@ body.dark .node-row.flash { background: #4a3f16; }
 #toast.show { opacity: 1; }
 
 .hidden { display: none !important; }
+
+.tree-toolbar { display: flex; gap: 8px; padding: 4px 12px; border-bottom: 1px solid var(--border); }
+.tree-toolbar .linklike { font-size: 12px; padding: 2px 6px; }
