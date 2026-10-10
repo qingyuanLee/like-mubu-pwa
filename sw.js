@@ -1,6 +1,6 @@
 // Service Worker：缓存静态资源，API 请求不缓存
-const CACHE_NAME = 'like-mubu-v1';
-const ASSETS = ['/', '/index.html', '/app.js', '/style.css', '/manifest.json'];
+const CACHE_NAME = 'like-mubu-v2';
+const ASSETS = ['/', '/index.html', '/app.js', '/gitee-client.js', '/style.css', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -20,16 +20,14 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   // API 请求走网络，不缓存
   if (url.pathname.startsWith('/api/')) return;
-  // 静态资源：cache-first
+  // 静态资源：network-first（确保总是拿到最新 JS/CSS）
   e.respondWith(
-    caches.match(e.request).then((cached) => {
-      return cached || fetch(e.request).then((res) => {
-        if (res.status === 200) {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
-        }
-        return res;
-      });
-    })
+    fetch(e.request).then((res) => {
+      if (res.status === 200) {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
