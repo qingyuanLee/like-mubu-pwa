@@ -962,15 +962,15 @@ window.addEventListener('hashchange', async () => {
 });
 
 // ============ 启动 ============
-(async function init() {
+window.addEventListener('DOMContentLoaded', async function init() {
   if (localStorage.getItem('lm.dark')) document.body.classList.add('dark');
   try {
     const h = await api('GET', '/api/health');
     state.health = h;
     const badge = $('#mode-badge');
-    badge.textContent = h.mode === 'github' ? 'GitHub 存储' : '本地模式';
-    badge.title = h.mode === 'github' ? `${h.repo}/${h.branch}/${h.root}` : '';
-    $('#foot-info').textContent = h.mode === 'github' ? (h.repo || '') : '离线可用';
+    badge.textContent = h.mode === 'github' ? 'GitHub 存储' : (h.mode === 'gitee' ? 'Gitee 存储' : '本地模式');
+    badge.title = h.repo ? `${h.repo}/${h.branch}/${h.root}` : '';
+    $('#foot-info').textContent = h.repo || '离线可用';
   } catch (e) {
     toast('无法连接后端服务，请确认已运行 npm start');
   }
@@ -979,4 +979,4 @@ window.addEventListener('hashchange', async () => {
   if (m) {
     try { await openDoc(decodeURIComponent(m[1])); } catch { /* 文档可能已删除 */ }
   }
-})();
+});
