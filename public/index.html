@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="like-mubu - Gitee 仓库存储的大纲笔记 PWA">
+<title>like-mubu · 大纲笔记</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▤</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▤</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <span class="logo">▤</span> like-mubu
+      <span id="mode-badge" class="badge"></span>
+    </div>
+    <div class="side-actions">
+      <button id="btn-daily" class="btn primary" title="打开今天的日志（不存在则创建）">今日日志</button>
+      <button id="btn-new" class="btn">新建文档</button>
+    </div>
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="搜索全部笔记…（按 / 聚焦）" autocomplete="off">
+    </div>
+    <div id="search-results" class="search-results hidden"></div>
+    <div id="tag-list" class="tag-list"></div>
+    <nav id="tree" class="tree"></nav>
+    <div class="sidebar-foot">
+      <button id="btn-theme" class="linklike">深色模式</button>
+      <span id="foot-info"></span>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="welcome" class="welcome">
+      <h1>欢迎使用 like-mubu</h1>
+      <p>以 Gitee 仓库为存储的大纲笔记（幕布平替）。</p>
+      <ul>
+        <li>点击「新建文档」或「今日日志」开始记录</li>
+        <li>Enter 新增同级节点 · Tab / Shift+Tab 缩进 / 反缩进 · Ctrl+Enter 新增子节点</li>
+        <li>Alt+↑/↓ 移动节点 · Ctrl+S 保存 · Ctrl+Z / Ctrl+Y 撤销重做</li>
+        <li>节点内支持 **加粗**、`代码`、#标签、[链接](url)、- [ ] 待办</li>
+      </ul>
+    </div>
+
+    <div id="editor" class="editor hidden">
+      <header class="doc-header">
+        <input id="doc-title" class="doc-title" placeholder="文档标题">
+        <div id="doc-meta" class="doc-meta"></div>
+        <div id="doc-actions">
+          <span id="save-status" class="save-status"></span>
+          <button id="btn-map" class="btn icon" title="切换思维导图视图">导图</button>
+          <button id="btn-outline" class="btn icon hidden" title="切换回大纲视图">大纲</button>
+          <button id="btn-props" class="btn icon" title="属性 / 重命名 / 移动">⋯</button>
+          <button id="btn-del" class="btn icon danger" title="删除文档">删除</button>
+        </div>
+      </header>
+      <div id="outline" class="outline"></div>
+      <div id="mindmap-wrap" class="mindmap-wrap hidden">
+        <svg id="mindmap"></svg>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast"></div>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
