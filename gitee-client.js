@@ -161,25 +161,16 @@ window.api = async function(method, url, body) {
     return [];
   }
 
-  // 搜索
+  // 搜索：先匹配标题/路径（即时），避免逐个读文件触发 API 限速
   if (url.startsWith('/api/search?q=')) {
     const q = decodeURIComponent(url.split('q=')[1]).toLowerCase();
     const paths = await listDir(GITEE_CFG.root);
     const results = [];
     for (const p of paths) {
-      try {
-        const file = await gitee(`${GITEE_CFG.root}/${enc(p)}`);
-        const content = b64decode(file.content);
-        const lines = content.split('\n');
-        const snippets = [];
-        for (const line of lines) {
-          if (line.toLowerCase().includes(q)) {
-            snippets.push(line.trim().slice(0, 200));
-            if (snippets.length >= 3) break;
-          }
-        }
-        if (snippets.length) results.push({ path: p, title: p.replace(/\.md$/, '').split('/').pop(), snippets });
-      } catch {}
+      const title = p.replace(/\.md$/, '').split('/').pop();
+      if (title.toLowerCase().includes(q) || p.toLowerCase().includes(q)) {
+        results.push({ path: p, title, snippets: [p] });
+      }
     }
     return results;
   }
