@@ -227,9 +227,11 @@ body.dark .node-row.flash { background: #4a3f16; }
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 40;
 }
 
+#menu-toggle-welcome { display: none !important; }
 @media (max-width: 768px) {
   body { font-size: 16px; }
   #menu-toggle { display: block; }
+  #menu-toggle-welcome { display: block !important; }
 
   /* 侧边栏变成抽屉 */
   #sidebar {

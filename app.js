@@ -1086,14 +1086,18 @@ window.addEventListener('DOMContentLoaded', async function init() {
 
 // 移动端侧边栏抽屉
 (function() {
-  const btn = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('sidebar');
   const backdrop = document.getElementById('sidebar-backdrop');
-  if (!btn || !sidebar) return;
+  if (!sidebar) return;
   function toggle() { sidebar.classList.toggle('open'); }
   function close() { sidebar.classList.remove('open'); }
-  btn.addEventListener('click', toggle);
-  backdrop.addEventListener('click', close);
+  // 文档头部的菜单按钮
+  const btn1 = document.getElementById('menu-toggle');
+  if (btn1) btn1.addEventListener('click', toggle);
+  // 欢迎页的浮动菜单按钮
+  const btn2 = document.getElementById('menu-toggle-welcome');
+  if (btn2) btn2.addEventListener('click', toggle);
+  if (backdrop) backdrop.addEventListener('click', close);
   // 选中文档后自动关闭抽屉
   window.addEventListener('hashchange', close);
 })();
