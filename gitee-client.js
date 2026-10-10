@@ -127,12 +127,14 @@ function parseMd(content) {
 // 新 URL: https://gitee.com/api/v5/repos/{owner}/{repo}/raw/{path}?access_token=xxx&ref=branch （200, image/jpeg）
 window.fixGiteeImg = function(url) {
   if (!url) return url;
+  url = url.trim();
   const m = url.match(/gitee\.com\/([^/]+)\/([^/]+)\/raw\/([^/]+)\/(.+)/);
   if (m) {
     const [, owner, repo, branch, path] = m;
+    const cleanPath = path.trim();
     const token = localStorage.getItem('gitee_token');
     if (token) {
-      return `https://gitee.com/api/v5/repos/${owner}/${repo}/raw/${path}?access_token=${token}&ref=${branch}`;
+      return `https://gitee.com/api/v5/repos/${owner}/${repo}/raw/${cleanPath}?access_token=${token}&ref=${branch}`;
     }
   }
   return url;
